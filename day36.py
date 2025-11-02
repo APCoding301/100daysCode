@@ -7,6 +7,9 @@ COMPANY_NAME = "Tesla Inc"
 ## STEP 1: Use https://www.alphavantage.co
 # When STOCK price increase/decreases by 5% between yesterday and the day before yesterday then print("Get News").
 stock_endpoint = "https://www.alphavantage.co/query"
+# set up environment variable -- export AP_STOCK_API=<AP's AlphaVantage API key>
+# DO THIS before running this .py!!!
+# API key is found in the usual places.. HISSSSTTTT HIST...careful!
 stock_api_key = os.environ.get("AP_STOCK_API")
 
 stock_params = {

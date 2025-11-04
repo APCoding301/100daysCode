@@ -1,5 +1,7 @@
 import requests
 import os
+from datetime import datetime, timedelta
+
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -41,15 +43,58 @@ for date, details in stock_data["Time Series (Daily)"].items():
     if day_counter == 2:
         break
 
-print(f"Last working day for this market's close price: {last_work_day_close}")
+print(f"Last working day's close price: {last_work_day_close}")
 print(f"The day BEFORE the last working day's close prices: {day_before_close}")
+
+# Testing.. hard-coding the close prices so that percent change is definitely more/less than +/- 5%!!!
+# last_work_day_close = 109.00
+# day_before_close = 100.00
 
 percent_price_change = ((last_work_day_close - day_before_close) / day_before_close) * 100
 
 if (percent_price_change >= 5.00) or (percent_price_change <= -5.00):
-    print("Get News!!")
+    #print("Get News!!")
+    news_endpoint = "https://newsapi.org/v2/everything"
+    # set up environment variable -- export AP_NEWS_API=<AP's NewsAPI.org API key>
+    # DO THIS before running this .py!!!
+    # API key is found in the usual places.. HISSSSTTTT HIST...careful!
+    news_api_key = os.environ.get("AP_NEWS_API")
+    news_params = {
+        "qInTitle": COMPANY_NAME,
+        "from": (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d'),  # Dynamically determining last 7 days time window
+        "sortBy": "popularity",
+        "apiKey": news_api_key
+    }
+
+    # print(f'The from date is: {news_params["from"]}')
+
+    response = requests.get(news_endpoint, params=news_params)
+    response.raise_for_status()
+    news_data = response.json()
+    #print(news_data)
+    num_articles = news_data["totalResults"]
+    if num_articles == 0:
+        print(f"No articles have been published for: {COMPANY_NAME}")
+    else:
+        articles = news_data["articles"]
+        # use Python slice operator to create a list that contains the first 3
+        # articles ONLY
+        three_articles = articles[:3]
+        print(three_articles)
+        # Below lines of code was my ORIG attempt! It works 100%
+        # article_count = 0
+        # for article in news_data["articles"]:
+        #     article_count += 1
+        #     # Instead of sending SMS or WhatsApp msgs thru Twilio, I am
+        #     # just printing it out to the console. --AP Nov 3, 2025
+        #     print(article["title"])
+        #     print(article["description"])
+        #     if article_count >= 3:
+        #         break
+        
+
 else:
-    print("Less than plus/minus 5 per cent... No news to get!!")
+    print("Percent difference is UNDER plus/minus 5 per cent... No news to get!!")
 
 
 ## STEP 2: Use https://newsapi.org
